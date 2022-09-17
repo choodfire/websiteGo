@@ -5,61 +5,20 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"shoppingCart/data"
 )
 
-type User struct {
-	name     string
-	password string
-}
-
-type Users struct {
-	Users []User
-}
-
-func (u *Users) AddNewUser(login string, password string) {
-	u.Users = append(u.Users, User{login, password})
-}
-
-var usr Users
-
-func checkLoginInfo(writtenLogin string, writtenPassword string) bool {
-	fmt.Println(usr)
-	for _, user := range usr.Users {
-		if user.name == writtenLogin && user.password == writtenPassword {
-			return true
-		}
-	}
-
-	return false
-}
-
-func checkRegistrationInfo(writtenLogin string, writtenPassword string,
-	writtenPassword2 string) bool {
-	fmt.Println(usr)
-	if writtenPassword != writtenPassword2 {
-		return false
-	}
-
-	for _, user := range usr.Users {
-		if user.name == writtenLogin {
-			return false
-		}
-	}
-
-	usr.AddNewUser(writtenLogin, writtenPassword)
-
-	return true
-}
+var usr data.Users
 
 func mainPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Main", r.Method)
-	t, _ := template.ParseFiles("main.html")
+	t, _ := template.ParseFiles("./static/html/main.html")
 	t.Execute(w, nil)
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Login", r.Method)
-	t, _ := template.ParseFiles("login.html")
+	t, _ := template.ParseFiles("./static/html/login.html")
 	t.ExecuteTemplate(w, "login.html", nil)
 }
 
@@ -68,7 +27,7 @@ func loginResult(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fmt.Println("Log", r.Form)
 
-	if checkLoginInfo(r.FormValue("username"), r.FormValue("password")) == true {
+	if data.CheckLoginInfo(r.FormValue("username"), r.FormValue("password"), usr) == true {
 		http.Redirect(w, r, "/account", http.StatusSeeOther)
 	} else {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -77,7 +36,7 @@ func loginResult(w http.ResponseWriter, r *http.Request) {
 
 func register(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Reg", r.Method)
-	t, _ := template.ParseFiles("register.html")
+	t, _ := template.ParseFiles("./static/html/register.html")
 	t.ExecuteTemplate(w, "register.html", nil)
 }
 
@@ -86,8 +45,8 @@ func registerResult(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fmt.Println("Reg", r.Form)
 
-	if checkRegistrationInfo(r.FormValue("username"), 
-	r.FormValue("password"), r.FormValue("password2")) == true {
+	if data.CheckRegistrationInfo(r.FormValue("username"), 
+	r.FormValue("password"), r.FormValue("password2"), usr) == true {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	} else {
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
