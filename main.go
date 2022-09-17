@@ -18,7 +18,7 @@ type Users struct {
 }
 
 func (u *Users) AddNewUser(login string, password string) {
-
+	u.Users = append(u.Users, User{login, password})
 }
 
 var usr Users
@@ -46,6 +46,8 @@ func checkRegistrationInfo(writtenLogin string, writtenPassword string,
 			return false
 		}
 	}
+
+	usr.AddNewUser(writtenLogin, writtenPassword)
 
 	return true
 }
