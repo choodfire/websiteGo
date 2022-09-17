@@ -7,7 +7,9 @@
 </head>
 
 <body>
-    <form action="/login" method="post">
+    {{.}}
+
+    <form action="/loginResult/" method="post">
         Имя пользователя:<input type="text" name="username">
         Пароль:<input type="password" name="password">
         <input type="submit" value="Войти">

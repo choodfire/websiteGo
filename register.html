@@ -7,10 +7,12 @@
 </head>
 
 <body>
-    <form action="/login" method="post">
+    {{.}}
+
+    <form action="/registerResult/" method="post">
         Имя пользователя:<input type="text" name="username">
         Пароль:<input type="password" name="password">
-        Повторите пароль:<input type="password" name="password1">
+        Повторите пароль:<input type="password" name="password2">
         <input type="submit" value="Войти">
     </form>
 </body>
