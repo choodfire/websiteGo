@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	// "time"
 )
 
 type User struct {
@@ -53,55 +52,57 @@ func checkRegistrationInfo(writtenLogin string, writtenPassword string,
 }
 
 func mainPage(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Main", r.Method)
 	t, _ := template.ParseFiles("main.html")
 	t.Execute(w, nil)
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Login", r.Method)
 	t, _ := template.ParseFiles("login.html")
-	t.Execute(w, nil)
+	t.ExecuteTemplate(w, "login.html", nil)
 }
 
 func loginResult(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Login res", r.Method)
 	r.ParseForm()
 	fmt.Println("Log", r.Form)
 
 	if checkLoginInfo(r.FormValue("username"), r.FormValue("password")) == true {
-		// redirect to account page
 		http.Redirect(w, r, "/account", http.StatusSeeOther)
 	} else {
-		// fmt.Fprintf(w, "Wrong password!")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 }
 
 func register(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Reg", r.Method)
 	t, _ := template.ParseFiles("register.html")
 	t.ExecuteTemplate(w, "register.html", nil)
 }
 
 func registerResult(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Reg res", r.Method)
 	r.ParseForm()
 	fmt.Println("Reg", r.Form)
 
-	if checkRegistrationInfo(r.FormValue("username"), r.FormValue("password"), r.FormValue("password2")) == true {
-		// fmt.Fprintf(w, "Login successfully!")
-		t, _ := template.ParseFiles("login.html")
-		t.ExecuteTemplate(w, "login.html", "Registration successful!")
+	if checkRegistrationInfo(r.FormValue("username"), 
+	r.FormValue("password"), r.FormValue("password2")) == true {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	} else {
-		// fmt.Fprintf(w, "Wrong credentials!")
-		t, _ := template.ParseFiles("register.html")
-		t.ExecuteTemplate(w, "register.html", "Wrong credentials!")
+		http.Redirect(w, r, "/register", http.StatusSeeOther)
 	}
 }
 
 func account(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Account", r.Method)
 	fmt.Fprintf(w, "This is your account!")
 }
 
 func main() {
 	http.HandleFunc("/", mainPage)
 	http.HandleFunc("/login/", login)
+	http.HandleFunc("/loginResult/", loginResult)
 	http.HandleFunc("/register/", register)
 	http.HandleFunc("/registerResult/", registerResult)
 	http.HandleFunc("/account/", account)
