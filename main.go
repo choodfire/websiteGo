@@ -9,16 +9,15 @@ import (
 )
 
 var usr data.Users
+var t *template.Template
 
 func mainPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Main", r.Method)
-	t, _ := template.ParseFiles("./static/html/main.html")
-	t.Execute(w, nil)
+	t.ExecuteTemplate(w, "main.html", nil)
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Login", r.Method)
-	t, _ := template.ParseFiles("./static/html/login.html")
 	t.ExecuteTemplate(w, "login.html", nil)
 }
 
@@ -27,16 +26,16 @@ func loginResult(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fmt.Println("Log", r.Form)
 
-	if data.CheckLoginInfo(r.FormValue("username"), r.FormValue("password"), usr) == true {
+	if usr.CheckLoginInfo(r.FormValue("username"), r.FormValue("password")) == true {
 		http.Redirect(w, r, "/account", http.StatusSeeOther)
 	} else {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		// http.Redirect(w, r, "/login", http.StatusSeeOther)
+		t.ExecuteTemplate(w, "login.html", "Wrong credentials")
 	}
 }
 
 func register(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Reg", r.Method)
-	t, _ := template.ParseFiles("./static/html/register.html")
 	t.ExecuteTemplate(w, "register.html", nil)
 }
 
@@ -45,11 +44,11 @@ func registerResult(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fmt.Println("Reg", r.Form)
 
-	if data.CheckRegistrationInfo(r.FormValue("username"), 
-	r.FormValue("password"), r.FormValue("password2"), usr) == true {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	if err := usr.CheckRegistrationInfo(r.FormValue("username"), r.FormValue("password"), r.FormValue("password2")); err == nil {
+		t.ExecuteTemplate(w, "register.html", err.Error())
 	} else {
-		http.Redirect(w, r, "/register", http.StatusSeeOther)
+		usr.AddNewUser(r.FormValue("username"), r.FormValue("password"))
+		t.ExecuteTemplate(w, "login.html", "Registrarion successful")
 	}
 }
 
@@ -59,6 +58,8 @@ func account(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	t, _ = template.ParseGlob("./static/html/*.html")
+
 	http.HandleFunc("/", mainPage)
 	http.HandleFunc("/login/", login)
 	http.HandleFunc("/loginResult/", loginResult)

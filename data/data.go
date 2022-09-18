@@ -1,5 +1,10 @@
 package data
 
+import (
+	"errors"
+	"unicode"
+)
+
 type user struct {
 	name     string
 	password string
@@ -13,8 +18,8 @@ func (u *Users) AddNewUser(login string, password string) {
 	u.Users = append(u.Users, user{login, password})
 }
 
-func CheckLoginInfo(writtenLogin string, writtenPassword string, usr Users) bool {
-	for _, user := range usr.Users {
+func (u Users) CheckLoginInfo(writtenLogin string, writtenPassword string) bool {
+	for _, user := range u.Users {
 		if user.name == writtenLogin && user.password == writtenPassword {
 			return true
 		}
@@ -23,20 +28,42 @@ func CheckLoginInfo(writtenLogin string, writtenPassword string, usr Users) bool
 	return false
 }
 
-func CheckRegistrationInfo(writtenLogin string, writtenPassword string,
-	writtenPassword2 string, usr Users) bool {
-
+func (u Users) CheckRegistrationInfo(writtenLogin string, writtenPassword string, writtenPassword2 string) error {
 	if writtenPassword != writtenPassword2 {
-		return false
+		return errors.New("Пароли не совпадают")
 	}
 
-	for _, user := range usr.Users {
-		if user.name == writtenLogin {
-			return false
+	var loginLength, passLength, passUpper, passLower, passDigits bool
+
+	if len(writtenLogin) > 3 && len(writtenLogin) < 21 {
+		loginLength = true
+	}
+
+	if len(writtenPassword) > 5 {
+		passLength = true
+	}
+
+	for _, char := range writtenPassword {
+		if unicode.IsDigit(char) {
+			passDigits = true
+		}
+		if unicode.IsUpper(char) {
+			passUpper = true
+		}
+		if unicode.IsLower(char) {
+			passLower = true
 		}
 	}
 
-	usr.AddNewUser(writtenLogin, writtenPassword)
+	for _, user := range u.Users {
+		if user.name == writtenLogin {
+			return errors.New("Аккаунт с таким именем уже существует")
+		}
+	}
 
-	return true
+	if loginLength && passLength && passUpper && passLower && passDigits == false {
+		return errors.New("Имя аккаунта или пароль не соответствуют условиям")
+	}
+
+	return nil
 }
