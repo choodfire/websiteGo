@@ -2,3 +2,4 @@ go.mod
 .vscode/
 .idea
 go.sum
+data/settings.go

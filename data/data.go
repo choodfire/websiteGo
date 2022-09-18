@@ -2,12 +2,13 @@ package data
 
 import (
 	"errors"
+	"golang.org/x/crypto/bcrypt"
 	"unicode"
 )
 
 type user struct {
 	name     string
-	password string
+	password []byte
 }
 
 type Users struct {
@@ -15,12 +16,13 @@ type Users struct {
 }
 
 func (u *Users) AddNewUser(login string, password string) {
-	u.Users = append(u.Users, user{login, password})
+	pass, _ := bcrypt.GenerateFromPassword([]byte(password), cost)
+	u.Users = append(u.Users, user{login, pass})
 }
 
 func (u Users) CheckLoginInfo(writtenLogin string, writtenPassword string) bool {
 	for _, user := range u.Users {
-		if user.name == writtenLogin && user.password == writtenPassword {
+		if user.name == writtenLogin && bcrypt.CompareHashAndPassword(user.password, []byte(writtenPassword)) == nil {
 			return true
 		}
 	}
