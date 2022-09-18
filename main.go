@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"html"
 	"html/template"
 	"log"
 	"net/http"
@@ -26,10 +28,12 @@ func loginResult(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fmt.Println("Log", r.Form)
 
-	if usr.CheckLoginInfo(r.FormValue("username"), r.FormValue("password")) == true {
+	username := html.EscapeString(r.FormValue("username"))
+	password := html.EscapeString(r.FormValue("password"))
+
+	if usr.CheckLoginInfo(username, password) == true {
 		http.Redirect(w, r, "/account", http.StatusSeeOther)
 	} else {
-		// http.Redirect(w, r, "/login", http.StatusSeeOther)
 		t.ExecuteTemplate(w, "login.html", "Wrong credentials")
 	}
 }
@@ -44,10 +48,14 @@ func registerResult(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fmt.Println("Reg", r.Form)
 
-	if err := usr.CheckRegistrationInfo(r.FormValue("username"), r.FormValue("password"), r.FormValue("password2")); err == nil {
+	username := html.EscapeString(r.FormValue("username"))
+	password := html.EscapeString(r.FormValue("password"))
+	password2 := html.EscapeString(r.FormValue("password2"))
+
+	if err := usr.CheckRegistrationInfo(username, password, password2); err != nil {
 		t.ExecuteTemplate(w, "register.html", err.Error())
 	} else {
-		usr.AddNewUser(r.FormValue("username"), r.FormValue("password"))
+		usr.AddNewUser(username, password)
 		t.ExecuteTemplate(w, "login.html", "Registrarion successful")
 	}
 }
